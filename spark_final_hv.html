@@ -2308,7 +2308,7 @@
 
                     if (livenessMode === 'attendance') {
                         // All tasks completed during attendance
-                        finalizeAttendance();
+                        finalizeAttendance(detections);
                     }
                 }
             }
@@ -2845,9 +2845,12 @@
 
 
         // Helper to finalize attendance after face match + liveness
-        async function finalizeAttendance() {
+        async function finalizeAttendance(providedDetections = null) {
             // Re-detect to confirm face match during liveness or after
-            const detections = await faceapi.detectSingleFace(videoAttendance, new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 })).withFaceDescriptor();
+            let detections = providedDetections;
+            if (!detections) {
+                detections = await faceapi.detectSingleFace(videoAttendance, new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 })).withFaceDescriptor();
+            }
             if (!detections) {
                 showMessage("Face lost during verification. Try again.");
                 return;
