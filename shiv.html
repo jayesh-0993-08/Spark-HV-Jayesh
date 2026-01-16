@@ -144,6 +144,12 @@
 
     </script>
 
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
+
     <script type="module">
         import { GoogleGenerativeAI } from "@google/generative-ai";
 
@@ -380,8 +386,8 @@
 </head>
 
 <body class="bg-gray-900 min-h-screen text-white">
-    <!-- Navigation Bar -->
-    <nav class="bg-blue-600 text-white shadow-lg">
+    <!-- Navigation Bar (Hidden on Landing) -->
+    <nav id="navbar" class="hidden bg-blue-600 text-white shadow-lg sticky top-0 z-50">
         <div class="container mx-auto px-4">
             <div class="flex justify-between items-center py-4">
                 <div class="flex items-center space-x-2">
@@ -403,8 +409,8 @@
         </div>
     </nav>
 
-    <!-- Mobile Tabs -->
-    <div class="bg-gray-800 shadow-md md:hidden">
+    <!-- Mobile Tabs (Hidden on Landing) -->
+    <div id="mobile-tabs" class="hidden bg-gray-800 shadow-md md:hidden">
         <div class="flex overflow-x-auto">
             <button class="tab-btn px-4 py-3 font-medium text-blue-400 border-b-2 border-blue-400"
                 data-tab="attendance">
@@ -422,7 +428,8 @@
         </div>
     </div>
 
-    <div class="container mx-auto px-4 py-6">
+    <!-- MAIN APP CONTENT (Hidden initially) -->
+    <div id="main-app" class="hidden container mx-auto px-4 py-6">
         <div class="flex flex-col md:flex-row gap-6">
             <!-- Sidebar (Desktop) -->
             <div class="hidden md:block w-full md:w-1/4 lg:w-1/5">
@@ -438,32 +445,37 @@
 
                     <nav class="space-y-2">
                         <button
-                            class="tab-btn w-full text-left px-4 py-3 rounded-lg font-medium text-blue-400 bg-blue-900"
+                            class="tab-btn w-full text-left px-4 py-3 rounded-lg font-medium text-blue-400 bg-blue-900/50 border border-blue-500/20"
+                            data-tab="dashboard-home">
+                            <i class="fas fa-home mr-3"></i>Dashboard
+                        </button>
+                        <button
+                            class="tab-btn w-full text-left px-4 py-3 rounded-lg font-medium text-gray-400 hover:bg-gray-700/50 hover:text-gray-200 transition-colors"
                             data-tab="attendance">
                             <i class="fas fa-fingerprint mr-3"></i>Attendance
                         </button>
                         <button
-                            class="tab-btn w-full text-left px-4 py-3 rounded-lg font-medium text-gray-400 hover:bg-gray-700"
+                            class="tab-btn w-full text-left px-4 py-3 rounded-lg font-medium text-gray-400 hover:bg-gray-700/50 hover:text-gray-200 transition-colors"
                             data-tab="timetable">
                             <i class="fas fa-calendar-alt mr-3"></i>Timetable
                         </button>
                         <button
-                            class="tab-btn w-full text-left px-4 py-3 rounded-lg font-medium text-gray-400 hover:bg-gray-700"
+                            class="tab-btn w-full text-left px-4 py-3 rounded-lg font-medium text-gray-400 hover:bg-gray-700/50 hover:text-gray-200 transition-colors"
                             data-tab="rescheduler">
                             <i class="fas fa-exchange-alt mr-3"></i>Rescheduler
                         </button>
                         <button
-                            class="tab-btn w-full text-left px-4 py-3 rounded-lg font-medium text-gray-400 hover:bg-gray-700"
+                            class="tab-btn w-full text-left px-4 py-3 rounded-lg font-medium text-gray-400 hover:bg-gray-700/50 hover:text-gray-200 transition-colors"
                             data-tab="suggestions">
                             <i class="fas fa-lightbulb mr-3"></i>Suggestions
                         </button>
                         <button
-                            class="tab-btn w-full text-left px-4 py-3 rounded-lg font-medium text-gray-400 hover:bg-gray-700"
+                            class="tab-btn w-full text-left px-4 py-3 rounded-lg font-medium text-gray-400 hover:bg-gray-700/50 hover:text-gray-200 transition-colors"
                             data-tab="profile">
                             <i class="fas fa-user mr-3"></i>Profile
                         </button>
                         <button
-                            class="tab-btn w-full text-left px-4 py-3 rounded-lg font-medium text-gray-400 hover:bg-gray-700"
+                            class="tab-btn w-full text-left px-4 py-3 rounded-lg font-medium text-gray-400 hover:bg-gray-700/50 hover:text-gray-200 transition-colors"
                             data-tab="routine">
                             <i class="fas fa-clock mr-3"></i>Daily Routine
                         </button>
@@ -502,82 +514,367 @@
             <!-- Main Content -->
             <div class="w-full md:w-3/4 lg:w-4/5">
                 <!-- Authentication Screens -->
-                <div id="auth-screens">
-                    <!-- Home Screen -->
-                    <div id="home-screen" class="bg-gray-800 p-6 rounded-lg shadow-md">
-                        <header class="text-center mb-8">
-                            <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">Secure Face Recognition</h1>
-                            <p class="text-gray-400">Registration, Login & Location Verification</p>
-                        </header>
+                <!-- LANDING PAGE / AUTH SCREENS (Full Screen) -->
+                <div id="auth-screens" class="min-h-screen flex flex-col justify-center items-center p-4">
+                    <!-- Role Selection Screen -->
+                    <div id="role-selection" class="flex flex-col items-center justify-center w-full max-w-6xl fade-in">
+                        <div class="text-center mb-16">
+                            <!-- Logo/Icon -->
+                            <div
+                                class="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-blue-600/10 mb-8">
+                                <i class="fas fa-graduation-cap text-6xl text-blue-500"></i>
+                            </div>
+                            <h1 class="text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight">Welcome to SPARK
+                            </h1>
+                            <p class="text-gray-400 text-xl max-w-2xl mx-auto">Your comprehensive platform for modern
+                                education management. Select your role to get started.</p>
+                        </div>
 
-                        <div class="space-y-6">
-                            <p class="text-center text-gray-400">Welcome! Use your face to register or log in.</p>
-                            <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 justify-center">
-                                <button onclick="showRegister()"
-                                    class="w-full md:w-auto px-8 py-3 bg-blue-600 text-white rounded-full font-semibold hover:bg-blue-700 transition transform hover:scale-105 shadow-lg">Register</button>
-                                <button onclick="showLogin()"
-                                    class="w-full md:w-auto px-8 py-3 bg-gray-700 text-white rounded-full font-semibold hover:bg-gray-600 transition transform hover:scale-105">Log
-                                    In</button>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 w-full px-4">
+                            <!-- Student Card -->
+                            <div class="bg-[#1a1c2e] p-10 rounded-3xl border border-gray-800 hover:border-blue-500 transition-all duration-300 group hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/10 flex flex-col items-center text-center cursor-pointer h-full"
+                                onclick="enterStudentPortal()">
+                                <div
+                                    class="w-24 h-24 rounded-full bg-blue-500/10 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300">
+                                    <i class="fas fa-user-graduate text-4xl text-blue-400"></i>
+                                </div>
+                                <h3 class="text-3xl font-bold text-white mb-4">Student</h3>
+                                <p class="text-gray-400 text-base mb-10 leading-relaxed flex-grow">Access your
+                                    attendance, manage your timetable, and receive personalized learning suggestions.
+                                </p>
+                                <button
+                                    class="w-full py-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg transition-all shadow-lg hover:shadow-blue-500/25">
+                                    Login as Student
+                                </button>
+                            </div>
+
+                            <!-- Teacher Card -->
+                            <div class="bg-[#1a1c2e] p-10 rounded-3xl border border-gray-800 hover:border-green-500 transition-all duration-300 group hover:-translate-y-2 hover:shadow-2xl hover:shadow-green-500/10 flex flex-col items-center text-center cursor-pointer h-full opacity-60 hover:opacity-100"
+                                onclick="alert('Teacher portal coming soon!')">
+                                <div
+                                    class="w-24 h-24 rounded-full bg-green-500/10 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300">
+                                    <i class="fas fa-chalkboard-teacher text-4xl text-green-400"></i>
+                                </div>
+                                <h3 class="text-3xl font-bold text-white mb-4">Teacher</h3>
+                                <p class="text-gray-400 text-base mb-10 leading-relaxed flex-grow">Mark class
+                                    attendance, update scheduling, and manage academic resources.</p>
+                                <button
+                                    class="w-full py-4 rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold text-lg transition-all shadow-lg hover:shadow-green-500/25">
+                                    Login as Teacher
+                                </button>
+                            </div>
+
+                            <!-- Admin Card -->
+                            <div class="bg-[#1a1c2e] p-10 rounded-3xl border border-gray-800 hover:border-purple-500 transition-all duration-300 group hover:-translate-y-2 hover:shadow-2xl hover:shadow-purple-500/10 flex flex-col items-center text-center cursor-pointer h-full opacity-60 hover:opacity-100"
+                                onclick="alert('Admin portal coming soon!')">
+                                <div
+                                    class="w-24 h-24 rounded-full bg-purple-500/10 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300">
+                                    <i class="fas fa-user-shield text-4xl text-purple-400"></i>
+                                </div>
+                                <h3 class="text-3xl font-bold text-white mb-4">Administrator</h3>
+                                <p class="text-gray-400 text-base mb-10 leading-relaxed flex-grow">System configuration,
+                                    user management, and institutional oversight.</p>
+                                <button
+                                    class="w-full py-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-lg transition-all shadow-lg hover:shadow-purple-500/25">
+                                    Login as Admin
+                                </button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Register Screen -->
-                    <div id="register-screen" class="hidden bg-gray-800 p-6 rounded-lg shadow-md">
-                        <h2 class="text-2xl font-semibold text-center mb-6">New User Registration</h2>
-                        <div class="camera-container rounded-3xl overflow-hidden mb-6 shadow-md mx-auto"
-                            style="max-width: 500px;">
-                            <video id="video-reg" class="block bg-black"></video>
-                            <canvas id="canvas-reg" class="block"></canvas>
-                        </div>
-                        <div class="space-y-4">
-                            <input type="text" id="username-input" placeholder="Enter your username"
-                                class="w-full p-3 rounded-full border border-gray-600 bg-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
-                            <button id="register-btn"
-                                class="w-full px-8 py-3 bg-blue-600 text-white rounded-full font-semibold hover:bg-green-700 transition transform hover:scale-105 shadow-lg"
-                                disabled>Capture Face and Register</button>
-                        </div>
-                        <button onclick="goHome()"
-                            class="mt-4 text-sm text-blue-400 hover:text-blue-300 transition duration-200">&larr; Back
-                            to
-                            Home</button>
-                    </div>
+                    <!-- Student Login/Register (Hidden by default, shown after clicking Student) -->
+                    <div id="student-auth" class="hidden w-full max-w-md">
+                        <!-- Home Screen (Student Portal Entry) -->
+                        <div id="home-screen" class="bg-gray-800 p-8 rounded-3xl shadow-xl border border-gray-700">
+                            <header class="text-center mb-10">
+                                <h1 class="text-3xl font-bold text-white mb-3">Student Login</h1>
+                                <p class="text-gray-400">Secure Face Recognition Access</p>
+                            </header>
 
-                    <!-- Login Screen -->
-                    <div id="login-screen" class="hidden bg-gray-800 p-6 rounded-lg shadow-md">
-                        <h2 class="text-2xl font-semibold text-center mb-6">User Login</h2>
-                        <div class="camera-container rounded-3xl overflow-hidden mb-6 shadow-md mx-auto"
-                            style="max-width: 500px;">
-                            <video id="video-login" class="block bg-black"></video>
-                            <canvas id="canvas-login" class="block"></canvas>
+                            <div class="space-y-6">
+                                <div class="flex flex-col space-y-4">
+                                    <button onclick="showLogin()"
+                                        class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold text-lg hover:bg-blue-700 transition transform hover:scale-[1.02] shadow-lg shadow-blue-500/20">
+                                        Log In with Face ID
+                                    </button>
+                                    <button onclick="showRegister()"
+                                        class="w-full py-4 bg-gray-700 text-white rounded-xl font-bold text-lg hover:bg-gray-600 transition transform hover:scale-[1.02]">
+                                        Register New Account
+                                    </button>
+                                </div>
+                                <button onclick="backToRoles()"
+                                    class="w-full text-center text-gray-500 hover:text-gray-300 mt-4 text-sm">
+                                    &larr; Back to Role Selection
+                                </button>
+                            </div>
                         </div>
-                        <button id="login-btn"
-                            class="w-full px-8 py-3 bg-blue-600 text-white rounded-full font-semibold hover:bg-blue-700 transition transform hover:scale-105 shadow-lg"
-                            disabled>Recognize Face & Verify Location</button>
-                        <button onclick="goHome()"
-                            class="mt-4 text-sm text-blue-400 hover:text-blue-300 transition duration-200">&larr; Back
-                            to
-                            Home</button>
-                    </div>
 
-                    <!-- Loading -->
-                    <div id="loading" class="hidden text-center bg-gray-800 p-6 rounded-lg shadow-md">
-                        <svg class="animate-spin h-10 w-10 text-blue-600 mx-auto" xmlns="http://www.w3.org/2000/svg"
-                            fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
-                            </circle>
-                            <path class="opacity-75" fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                            </path>
-                        </svg>
-                        <p class="mt-4 text-gray-400">Loading face models...</p>
+                        <!-- Register Screen -->
+                        <div id="register-screen"
+                            class="hidden bg-gray-800 p-8 rounded-3xl shadow-xl border border-gray-700">
+                            <h2 class="text-2xl font-bold text-center mb-8">New Student Registration</h2>
+                            <div
+                                class="camera-container rounded-2xl overflow-hidden mb-8 shadow-2xl mx-auto border-2 border-gray-700 w-full aspect-video bg-black relative">
+                                <video id="video-reg" class="w-full h-full object-cover"></video>
+                                <canvas id="canvas-reg" class="absolute top-0 left-0 w-full h-full"></canvas>
+                            </div>
+                            <div class="space-y-5">
+                                <input type="text" id="username-input" placeholder="Enter your full name"
+                                    class="w-full p-4 rounded-xl border border-gray-600 bg-gray-700/50 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition font-medium">
+                                <button id="register-btn"
+                                    class="w-full py-4 bg-green-600 text-white rounded-xl font-bold text-lg hover:bg-green-700 transition transform hover:scale-[1.02] shadow-lg shadow-green-500/20"
+                                    disabled>Capture & Register</button>
+                            </div>
+                            <button onclick="goHome()"
+                                class="w-full mt-6 text-sm text-gray-400 hover:text-white transition">&larr;
+                                Cancel</button>
+                        </div>
+
+                        <!-- Login Screen -->
+                        <div id="login-screen"
+                            class="hidden bg-gray-800 p-8 rounded-3xl shadow-xl border border-gray-700">
+                            <h2 class="text-2xl font-bold text-center mb-8">Verify Identity</h2>
+                            <div
+                                class="camera-container rounded-2xl overflow-hidden mb-8 shadow-2xl mx-auto border-2 border-gray-700 w-full aspect-video bg-black relative">
+                                <video id="video-login" class="w-full h-full object-cover"></video>
+                                <canvas id="canvas-login" class="absolute top-0 left-0 w-full h-full"></canvas>
+                            </div>
+                            <button id="login-btn"
+                                class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold text-lg hover:bg-blue-700 transition transform hover:scale-[1.02] shadow-lg shadow-blue-500/20"
+                                disabled>Authenticate</button>
+                            <button onclick="goHome()"
+                                class="w-full mt-6 text-sm text-gray-400 hover:text-white transition">&larr;
+                                Cancel</button>
+                        </div>
+
+                        <!-- Loading -->
+                        <div id="loading" class="hidden text-center bg-gray-800 p-8 rounded-3xl shadow-xl">
+                            <svg class="animate-spin h-12 w-12 text-blue-500 mx-auto mb-4"
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                    stroke-width="4">
+                                </circle>
+                                <path class="opacity-75" fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                </path>
+                            </svg>
+                            <h3 class="text-xl font-bold text-white">Initializing AI</h3>
+                            <p class="text-gray-400 mt-2">Loading secure face models...</p>
+                        </div>
                     </div>
                 </div>
 
+
                 <!-- Dashboard Content (Initially Hidden) -->
                 <div id="dashboard-content" class="hidden">
+                    <!-- Dashboard Home Tab -->
+                    <div id="dashboard-home" class="tab-content active">
+                        <!-- Welcome Banner -->
+                        <div
+                            class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#4f46e5] to-[#7c3aed] p-8 mb-8 shadow-2xl">
+                            <div
+                                class="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 rounded-full bg-white opacity-10 blur-xl">
+                            </div>
+                            <div
+                                class="absolute bottom-0 left-0 -mb-4 -ml-4 w-24 h-24 rounded-full bg-blue-300 opacity-10 blur-xl">
+                            </div>
+                            <div class="relative z-10 flex justify-between items-end">
+                                <div>
+                                    <h1 class="text-3xl font-bold text-white mb-2">Welcome back, <span
+                                            class="banner-username">User</span>!</h1>
+                                    <p class="text-blue-100">Here's what's happening today</p>
+                                </div>
+                                <div class="text-right hidden sm:block">
+                                    <div class="text-sm text-blue-200" id="current-date-display">Wednesday, January 14,
+                                        2026
+                                    </div>
+                                    <div class="text-2xl font-bold text-white space-mono" id="current-time-display">
+                                        09:09 PM
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Stats Cards -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                            <!-- Card 1 -->
+                            <div
+                                class="bg-[#1a1c2e] p-5 rounded-xl border-l-4 border-blue-500 shadow-lg relative overflow-hidden group hover:bg-[#202336] transition-colors">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="text-gray-400 text-sm font-medium mb-1">Today's Attendance</p>
+                                        <h3 class="text-2xl font-bold text-white">0/4</h3>
+                                    </div>
+                                    <div class="p-2 bg-blue-500/10 rounded-lg text-blue-400">
+                                        <i class="fas fa-fingerprint text-xl"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card 2 -->
+                            <div
+                                class="bg-[#1a1c2e] p-5 rounded-xl border-l-4 border-green-500 shadow-lg relative overflow-hidden group hover:bg-[#202336] transition-colors">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="text-gray-400 text-sm font-medium mb-1">Upcoming Classes</p>
+                                        <h3 class="text-2xl font-bold text-white">2</h3>
+                                    </div>
+                                    <div class="p-2 bg-green-500/10 rounded-lg text-green-400">
+                                        <i class="fas fa-calendar-check text-xl"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card 3 -->
+                            <div
+                                class="bg-[#1a1c2e] p-5 rounded-xl border-l-4 border-amber-500 shadow-lg relative overflow-hidden group hover:bg-[#202336] transition-colors">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="text-gray-400 text-sm font-medium mb-1">This Week</p>
+                                        <h3 class="text-2xl font-bold text-white">0%</h3>
+                                    </div>
+                                    <div class="p-2 bg-amber-500/10 rounded-lg text-amber-400">
+                                        <i class="fas fa-chart-line text-xl"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card 4 -->
+                            <div
+                                class="bg-[#1a1c2e] p-5 rounded-xl border-l-4 border-purple-500 shadow-lg relative overflow-hidden group hover:bg-[#202336] transition-colors">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="text-gray-400 text-sm font-medium mb-1">Total Classes</p>
+                                        <h3 class="text-2xl font-bold text-white">12</h3>
+                                    </div>
+                                    <div class="p-2 bg-purple-500/10 rounded-lg text-purple-400">
+                                        <i class="fas fa-book text-xl"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <!-- Quick Actions -->
+                            <div class="lg:col-span-2 space-y-6">
+                                <h3 class="flex items-center text-lg font-bold text-yellow-400">
+                                    <i class="fas fa-bolt mr-2"></i> Quick Actions
+                                </h3>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <button
+                                        class="bg-blue-600 hover:bg-blue-700 text-white p-6 rounded-xl shadow-lg transition transform hover:-translate-y-1 flex flex-col items-center justify-center gap-3 h-32"
+                                        onclick="document.querySelector('[data-tab=attendance]').click()">
+                                        <div
+                                            class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-2xl">
+                                            <i class="fas fa-fingerprint"></i>
+                                        </div>
+                                        <span class="font-bold">Mark Attendance</span>
+                                    </button>
+
+                                    <button
+                                        class="bg-green-600 hover:bg-green-700 text-white p-6 rounded-xl shadow-lg transition transform hover:-translate-y-1 flex flex-col items-center justify-center gap-3 h-32"
+                                        onclick="document.querySelector('[data-tab=timetable]').click()">
+                                        <div
+                                            class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-2xl">
+                                            <i class="fas fa-calendar-alt"></i>
+                                        </div>
+                                        <span class="font-bold">View Timetable</span>
+                                    </button>
+
+                                    <button
+                                        class="bg-purple-600 hover:bg-purple-700 text-white p-6 rounded-xl shadow-lg transition transform hover:-translate-y-1 flex flex-col items-center justify-center gap-3 h-32"
+                                        onclick="document.querySelector('[data-tab=suggestions]').click()">
+                                        <div
+                                            class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-2xl">
+                                            <i class="fas fa-lightbulb"></i>
+                                        </div>
+                                        <span class="font-bold">Suggestions</span>
+                                    </button>
+
+                                    <button
+                                        class="bg-gray-700 hover:bg-gray-600 text-white p-6 rounded-xl shadow-lg transition transform hover:-translate-y-1 flex flex-col items-center justify-center gap-3 h-32"
+                                        onclick="document.querySelector('[data-tab=profile]').click()">
+                                        <div
+                                            class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-2xl">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                        <span class="font-bold">My Profile</span>
+                                    </button>
+                                </div>
+
+                                <!-- Recent Activity Section -->
+                                <div class="mt-8">
+                                    <h3 class="flex items-center text-lg font-bold text-gray-200 mb-4">
+                                        <i class="fas fa-history mr-2"></i> Recent Activity
+                                    </h3>
+                                    <div class="bg-[#1a1c2e] rounded-xl p-4 border border-gray-800">
+                                        <div class="flex items-center gap-4 py-2">
+                                            <div
+                                                class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center text-green-400">
+                                                <i class="fas fa-check"></i>
+                                            </div>
+                                            <div>
+                                                <p class="text-white font-medium">Attendance marked</p>
+                                                <p class="text-sm text-gray-500">Data Structures • 9:05 AM</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Today's Schedule Column -->
+                            <div class="bg-[#1a1c2e] p-6 rounded-xl border border-gray-800 shadow-lg h-full">
+                                <h3 class="flex items-center text-lg font-bold text-blue-400 mb-6">
+                                    <i class="fas fa-clock mr-2"></i> Today's Schedule
+                                </h3>
+
+                                <div class="space-y-4">
+                                    <div class="bg-gray-800/50 p-4 rounded-xl border-l-4 border-green-500 relative">
+                                        <div class="flex justify-between items-start mb-1">
+                                            <span
+                                                class="bg-blue-600/90 text-white text-xs font-bold px-2 py-1 rounded">9:00</span>
+                                            <span
+                                                class="text-[10px] text-green-400 bg-green-900/40 px-2 py-0.5 rounded-full border border-green-900">Completed</span>
+                                        </div>
+                                        <h4 class="font-bold text-white">Data Structures</h4>
+                                        <p class="text-xs text-gray-400 mt-1">Room 302 • Prof. Sharma</p>
+                                    </div>
+
+                                    <div class="bg-gray-800/50 p-4 rounded-xl border-l-4 border-amber-500 relative">
+                                        <div class="flex justify-between items-start mb-1">
+                                            <span
+                                                class="bg-blue-600/90 text-white text-xs font-bold px-2 py-1 rounded">10:00</span>
+                                            <span
+                                                class="text-[10px] text-amber-400 bg-amber-900/40 px-2 py-0.5 rounded-full border border-amber-900">In
+                                                Progress</span>
+                                        </div>
+                                        <h4 class="font-bold text-white">Algorithms</h4>
+                                        <p class="text-xs text-gray-400 mt-1">Room 305 • Prof. Gupta</p>
+                                    </div>
+
+                                    <div class="bg-gray-800/50 p-4 rounded-xl border-l-4 border-blue-500 relative">
+                                        <div class="flex justify-between items-start mb-1">
+                                            <span
+                                                class="bg-green-600/90 text-white text-xs font-bold px-2 py-1 rounded">11:00</span>
+                                            <span
+                                                class="text-[10px] text-blue-400 bg-blue-900/40 px-2 py-0.5 rounded-full border border-blue-900">Upcoming</span>
+                                        </div>
+                                        <h4 class="font-bold text-white">Free Period</h4>
+                                        <p class="text-xs text-gray-400 mt-1">Library • Self Study</p>
+                                    </div>
+                                </div>
+
+                                <button onclick="document.querySelector('[data-tab=timetable]').click()"
+                                    class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold text-sm transition shadow-lg">
+                                    View Full Timetable →
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Attendance Tab -->
-                    <div id="attendance" class="tab-content active">
+                    <div id="attendance" class="tab-content">
                         <div class="bg-gray-800 p-6 rounded-lg shadow-md">
                             <h2 class="text-2xl font-bold mb-4">Mark Attendance</h2>
                             <div class="camera-container rounded-3xl overflow-hidden mb-6 shadow-md mx-auto"
@@ -628,60 +925,77 @@
 
                     <!-- Timetable Tab -->
                     <div id="timetable" class="tab-content">
-                        <div class="bg-gray-800 p-6 rounded-lg shadow-md">
-                            <h2 class="text-2xl font-bold mb-4">Weekly Timetable</h2>
-
-                            <div class="mb-6 flex justify-between items-center">
-                                <div class="flex space-x-2">
-                                    <button class="bg-blue-700 text-white px-3 py-1 rounded"
-                                        onclick="changeDay('Mon')">Mon</button>
-                                    <button class="bg-gray-700 text-gray-300 px-3 py-1 rounded"
-                                        onclick="changeDay('Tue')">Tue</button>
-                                    <button class="bg-gray-700 text-gray-300 px-3 py-1 rounded"
-                                        onclick="changeDay('Wed')">Wed</button>
-                                    <button class="bg-gray-700 text-gray-300 px-3 py-1 rounded"
-                                        onclick="changeDay('Thu')">Thu</button>
-                                    <button class="bg-gray-700 text-gray-300 px-3 py-1 rounded"
-                                        onclick="changeDay('Fri')">Fri</button>
+                        <div class="bg-gray-800 p-6 rounded-lg shadow-md min-h-[600px]">
+                            <div class="flex justify-between items-center mb-8 border-b border-gray-700 pb-6">
+                                <div>
+                                    <h2 class="text-3xl font-bold text-white mb-2">My Schedule</h2>
+                                    <p class="text-gray-400">Manage your weekly classes and timings</p>
                                 </div>
-                                <div class="text-blue-400 font-medium" id="currentDate">Monday, 12 June 2023</div>
+                                <div class="flex gap-3">
+                                    <button onclick="document.getElementById('timetable-upload').click()"
+                                        class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl flex items-center shadow-lg shadow-blue-500/20 transition-all transform hover:scale-105 active:scale-95 border border-blue-500/30">
+                                        <i class="fas fa-file-upload mr-2"></i> Import Excel/PDF
+                                    </button>
+                                    <input type="file" id="timetable-upload" class="hidden" accept=".xlsx,.xls,.pdf"
+                                        onchange="handleTimetableUpload(this)">
+                                </div>
                             </div>
 
-                            <div class="space-y-4" id="timetableContent">
-                                <div class="flex items-center p-4 border-l-4 border-blue-500 bg-blue-900 rounded-lg">
-                                    <div class="w-16 text-blue-200 font-bold">9:00</div>
-                                    <div class="flex-1">
-                                        <h3 class="font-semibold">Data Structures</h3>
-                                        <p class="text-sm text-gray-400">Room 302 • Prof. Sharma</p>
+                            <!-- Timetable Display/Edit Area -->
+                            <div id="timetable-display" class="space-y-6">
+                                <!-- Empty State -->
+                                <div id="timetable-empty"
+                                    class="flex flex-col items-center justify-center py-20 border-2 border-dashed border-gray-700/50 rounded-3xl bg-gray-800/30">
+                                    <div
+                                        class="w-20 h-20 rounded-full bg-gray-700/50 flex items-center justify-center mb-6 ring-4 ring-gray-800">
+                                        <i class="fas fa-calendar-alt text-3xl text-gray-500"></i>
                                     </div>
-                                    <div class="bg-green-800 text-green-200 text-xs px-2 py-1 rounded-full">Completed
-                                    </div>
+                                    <h3 class="text-2xl font-bold text-gray-200 mb-2">No Schedule Found</h3>
+                                    <p class="text-gray-400 max-w-md text-center mb-8 leading-relaxed">
+                                        Upload your class schedule to get started.<br>
+                                        <span class="text-sm opacity-70">Supported formats: Excel (.xlsx) or PDF with 3
+                                            columns (Teacher, Subject, Time)</span>
+                                    </p>
+                                    <button onclick="document.getElementById('timetable-upload').click()"
+                                        class="text-blue-400 hover:text-blue-300 font-semibold hover:underline decoration-2 underline-offset-4">
+                                        Browse from computer
+                                    </button>
                                 </div>
 
-                                <div class="flex items-center p-4 border-l-4 border-blue-500 bg-blue-900 rounded-lg">
-                                    <div class="w-16 text-blue-200 font-bold">10:00</div>
-                                    <div class="flex-1">
-                                        <h3 class="font-semibold">Algorithms</h3>
-                                        <p class="text-sm text-gray-400">Room 305 • Prof. Gupta</p>
+                                <!-- Table Editor (Hidden initially) -->
+                                <div id="timetable-container" class="hidden animate-fade-in">
+                                    <div
+                                        class="overflow-hidden rounded-2xl border border-gray-700/50 shadow-2xl bg-[#0b1220]">
+                                        <table class="w-full text-left border-collapse">
+                                            <thead>
+                                                <tr
+                                                    class="bg-gray-900/50 text-gray-400 text-sm uppercase tracking-wider">
+                                                    <th class="p-5 font-semibold border-b border-gray-800">Time / Slot
+                                                    </th>
+                                                    <th class="p-5 font-semibold border-b border-gray-800">Subject</th>
+                                                    <th class="p-5 font-semibold border-b border-gray-800">Teacher</th>
+                                                    <th class="p-5 font-semibold border-b border-gray-800 text-right">
+                                                        Actions
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="timetable-body"
+                                                class="divide-y divide-gray-800/50 text-gray-300">
+                                                <!-- Rows will be injected here -->
+                                            </tbody>
+                                        </table>
                                     </div>
-                                    <div class="bg-yellow-800 text-yellow-200 text-xs px-2 py-1 rounded-full">In
-                                        Progress</div>
-                                </div>
 
-                                <div class="flex items-center p-4 border-l-4 border-green-500 bg-green-900 rounded-lg">
-                                    <div class="w-16 text-green-200 font-bold">11:00</div>
-                                    <div class="flex-1">
-                                        <h3 class="font-semibold">Free Period</h3>
-                                        <p class="text-sm text-gray-400">Library • Self Study</p>
-                                    </div>
-                                    <div class="bg-blue-800 text-blue-200 text-xs px-2 py-1 rounded-full">Upcoming</div>
-                                </div>
-
-                                <div class="flex items-center p-4 border-l-4 border-gray-500 bg-gray-700 rounded-lg">
-                                    <div class="w-16 text-gray-300 font-bold">12:00</div>
-                                    <div class="flex-1">
-                                        <h3 class="font-semibold">Lunch Break</h3>
-                                        <p class="text-sm text-gray-400">Cafeteria</p>
+                                    <div
+                                        class="flex justify-between items-center mt-6 pt-6 border-t border-gray-700/30 sticky bottom-0 bg-gray-800 backdrop-blur-sm z-10">
+                                        <button onclick="addTimetableRow()"
+                                            class="text-blue-400 hover:text-blue-300 font-medium flex items-center px-4 py-2 hover:bg-blue-500/10 rounded-lg transition-colors">
+                                            <i class="fas fa-plus-circle mr-2"></i> Add Class Slot
+                                        </button>
+                                        <button onclick="saveTimetableComp()"
+                                            class="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-green-500/20 transition-all transform hover:-translate-y-1 active:translate-y-0">
+                                            Save Schedule
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -712,7 +1026,8 @@
                                 <div class="row">
                                     <label class="small">Number of lectures (per day)</label>
                                     <input id="periodCount" class="input" type="number" min="1" value="6" />
-                                    <label class="small">(Name your lectures optional - left blank uses P1,P2...)</label>
+                                    <label class="small">(Name your lectures optional - left blank uses
+                                        P1,P2...)</label>
                                 </div>
 
                                 <div class="row" style="margin-top:10px">
@@ -1125,6 +1440,7 @@
         // Load face-api models
         const loadModels = async () => {
             loading.classList.remove('hidden');
+            document.getElementById('role-selection').classList.add('hidden'); // Hide role select while loading
             try {
                 await Promise.all([
                     faceapi.nets.tinyFaceDetector.loadFromUri('https://justadudewhohacks.github.io/face-api.js/models'),
@@ -1132,12 +1448,20 @@
                     faceapi.nets.faceRecognitionNet.loadFromUri('https://justadudewhohacks.github.io/face-api.js/models')
                 ]);
                 loading.classList.add('hidden');
-                goHome();
+                // Show role selection instead of student home initially
+                document.getElementById('role-selection').classList.remove('hidden');
             } catch (err) {
                 console.error(err);
                 showMessage("Failed to load face models.");
                 loading.classList.add('hidden');
+                document.getElementById('role-selection').classList.remove('hidden');
             }
+        };
+
+        // Transition from Role Selector to Student Home
+        window.enterStudentPortal = function () {
+            document.getElementById('role-selection').classList.add('hidden');
+            goHome(); // This shows #home-screen (Student Entry)
         };
 
         // Update canvas size
@@ -1304,67 +1628,17 @@
             loggedInUser = null;
             authScreens.classList.remove('hidden');
             dashboardContent.classList.add('hidden');
-            homeScreen.classList.remove('hidden');
+            // Go back to role selection on logout
+            document.getElementById('role-selection').classList.remove('hidden');
+            homeScreen.classList.add('hidden');
             registerScreen.classList.add('hidden');
             loginScreen.classList.add('hidden');
             stopAllVideo();
         };
 
         // ===== Dashboard Tab Functionality =====
-        let currentTab = 'attendance';
-        document.querySelectorAll('.tab-btn').forEach(button => {
-            button.addEventListener('click', () => {
-                const tabId = button.getAttribute('data-tab');
-                if (tabId !== currentTab) {
-                    if (currentTab === 'attendance') {
-                        if (videoAttendance.srcObject) {
-                            videoAttendance.srcObject.getTracks().forEach(t => t.stop());
-                            videoAttendance.pause();
-                        }
-                        if (attendanceInterval) clearInterval(attendanceInterval);
-                        isVideoAttendancePlaying = false;
-                        markAttendanceBtn.disabled = true;
-                    }
-                    currentTab = tabId;
-                }
 
-                // Deactivate all tabs
-                document.querySelectorAll('.tab-btn').forEach(btn => {
-                    if (btn.classList.contains('text-blue-400')) {
-                        btn.classList.remove('text-blue-400', 'bg-blue-900', 'border-blue-400');
-                    }
-                    btn.classList.add('text-gray-400');
-                });
 
-                // Activate clicked tab
-                if (button.classList.contains('text-gray-400')) {
-                    button.classList.remove('text-gray-400');
-                }
-                button.classList.add('text-blue-400');
-
-                // For mobile tabs with border
-                if (button.classList.contains('border-b-2')) {
-                    button.classList.add('border-blue-400');
-                }
-
-                // For desktop tabs with background
-                if (!button.classList.contains('border-b-2')) {
-                    button.classList.add('bg-blue-900');
-                }
-
-                // Hide all tab content
-                document.querySelectorAll('.tab-content').forEach(content => {
-                    content.classList.remove('active');
-                });
-
-                // Show selected tab content
-                document.getElementById(tabId).classList.add('active');
-
-                if (tabId === 'attendance' && loggedInUser) {
-                    startVideo(videoAttendance, canvasAttendance, 'attendance');
-                }
-            });
-        });
 
         // ===== Timetable Day Change (Simple Simulation) =====
         function changeDay(day) {
@@ -1991,7 +2265,302 @@
         });
 
         // Initialize the application
-        window.addEventListener('load', loadModels);
+        // ===== TIMETABLE UPLOAD & EDIT FEATURE =====
+        const timetableBody = document.getElementById('timetable-body');
+        const timetableContainer = document.getElementById('timetable-container');
+        const timetableEmpty = document.getElementById('timetable-empty');
+
+        function getTimetableKey() {
+            const u = loggedInUser ? loggedInUser.username : 'default';
+            return `timetable_${u}`;
+        }
+
+        window.handleTimetableUpload = async function (input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+
+            if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                reader.onload = (e) => {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                    processTimetableData(jsonData);
+                };
+                reader.readAsArrayBuffer(file);
+            } else if (file.name.endsWith('.pdf')) {
+                reader.onload = async (e) => {
+                    const typedarray = new Uint8Array(e.target.result);
+                    try {
+                        const loadingTask = pdfjsLib.getDocument(typedarray);
+                        const pdf = await loadingTask.promise;
+                        let allRows = [];
+
+                        // Extract text from all pages
+                        for (let i = 1; i <= pdf.numPages; i++) {
+                            const page = await pdf.getPage(i);
+                            const textContent = await page.getTextContent();
+                            // Naive text extraction: join items with space
+                            // A better table extration would require checking Y coordinates
+                            // For this specific format (Teacher, Subject, Time) we assume they appear in order
+                            const strings = textContent.items.map(item => item.str);
+
+                            // Try to chunk by 3 if logical
+                            // This is highly dependent on PDF structure. 
+                            // We'll treat every 3 non-empty strings as a row as a fallback
+                            const nonEmpty = strings.filter(s => s.trim().length > 0);
+                            for (let j = 0; j < nonEmpty.length; j += 3) {
+                                if (j + 2 < nonEmpty.length) {
+                                    allRows.push([nonEmpty[j], nonEmpty[j + 1], nonEmpty[j + 2]]);
+                                }
+                            }
+                        }
+
+                        if (allRows.length === 0) {
+                            alert("Could not extract structured data from PDF. Please enter manually.");
+                            timetableEmpty.classList.add('hidden');
+                            timetableContainer.classList.remove('hidden');
+                            addTimetableRow();
+                        } else {
+                            processTimetableData(allRows);
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        alert("Error parsing PDF. Try Excel for better results.");
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            }
+        };
+
+        function processTimetableData(rows) {
+            if (!rows || rows.length === 0) return;
+
+            // Separate headers from data
+            // We assume the first row contains headers as requested
+            let headers = [];
+            let dataRows = [];
+
+            if (rows.length > 0) {
+                headers = rows[0].map(h => String(h).toLowerCase().trim());
+                dataRows = rows.slice(1); // Skip the first row
+            }
+
+            // Default mapping based on "Teacher, Subject, Time" assumption
+            let tIdx = 0;   // Teacher
+            let sIdx = 1;   // Subject
+            let timeIdx = 2; // Time
+
+            // Attempt to dynamically find columns if headers exist
+            if (headers.length > 0) {
+                const findIdx = (keywords) => headers.findIndex(h => keywords.some(k => h.includes(k)));
+
+                const foundT = findIdx(['teacher', 'prof', 'faculty', 'name', 'instructor']);
+                const foundS = findIdx(['subject', 'course', 'class', 'module']);
+                const foundTime = findIdx(['time', 'timing', 'slot', 'lecture', 'period']);
+
+                // Update indices only if found. 
+                // We trust the finding logic, but fallback to 0,1,2 if headers are completely ambiguous
+                if (foundT !== -1) tIdx = foundT;
+                if (foundS !== -1) sIdx = foundS;
+                if (foundTime !== -1) timeIdx = foundTime;
+            }
+
+            const cleanRows = [];
+
+            dataRows.forEach(row => {
+                if (!Array.isArray(row) || row.length === 0) return;
+
+                // Extract data using the mapped indices
+                // Handle cases where row might be shorter than expected
+                let teacher = row[tIdx] !== undefined ? row[tIdx] : '';
+                let subject = row[sIdx] !== undefined ? row[sIdx] : '';
+                let time = row[timeIdx] !== undefined ? row[timeIdx] : '';
+
+                // Clean up string values
+                teacher = String(teacher).trim();
+                subject = String(subject).trim();
+                time = String(time).trim();
+
+                // Skip completely empty rows
+                if (!teacher && !subject && !time) return;
+
+                cleanRows.push({ time, subject, teacher });
+            });
+
+            if (cleanRows.length === 0) {
+                showMessage("No valid data rows found after skipping headers.");
+                return;
+            }
+
+            renderTimetable(cleanRows);
+            timetableEmpty.classList.add('hidden');
+            timetableContainer.classList.remove('hidden');
+            showMessage(`Imported ${cleanRows.length} classes (Headers skipped).`);
+        }
+
+        function renderTimetable(data) {
+            timetableBody.innerHTML = '';
+            data.forEach(row => {
+                addTimetableRow(row.time, row.subject, row.teacher);
+            });
+            if (data.length === 0) addTimetableRow();
+        }
+
+        window.addTimetableRow = function (time = '', subject = '', teacher = '') {
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-gray-800/50 transition-colors group';
+            tr.innerHTML = `
+                <td class="p-3"><input type="text" value="${escapeHtml(time)}" placeholder="9:00 AM" class="w-full bg-transparent border border-gray-700 rounded px-2 py-1 text-white focus:border-blue-500 outline-none"></td>
+                <td class="p-3"><input type="text" value="${escapeHtml(subject)}" placeholder="Subject" class="w-full bg-transparent border border-gray-700 rounded px-2 py-1 text-white focus:border-blue-500 outline-none"></td>
+                <td class="p-3"><input type="text" value="${escapeHtml(teacher)}" placeholder="Prof. Name" class="w-full bg-transparent border border-gray-700 rounded px-2 py-1 text-white focus:border-blue-500 outline-none"></td>
+                <td class="p-3 text-right">
+                    <button onclick="this.closest('tr').remove()" class="text-red-400 hover:text-red-300 opacity-0 group-hover:opacity-100 transition-opacity p-2">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+             `;
+            timetableBody.appendChild(tr);
+        };
+
+        window.saveTimetableComp = function (data = null) {
+            let saveData = data;
+            if (!saveData) {
+                saveData = [];
+                timetableBody.querySelectorAll('tr').forEach(tr => {
+                    const inputs = tr.querySelectorAll('input');
+                    if (inputs.length >= 3) {
+                        saveData.push({
+                            time: inputs[0].value,
+                            subject: inputs[1].value,
+                            teacher: inputs[2].value
+                        });
+                    }
+                });
+            }
+            if (loggedInUser) {
+                localStorage.setItem(getTimetableKey(), JSON.stringify(saveData));
+                showMessage("Timetable saved for " + loggedInUser.username + "!");
+            } else {
+                showMessage("Please log in to save permanently.");
+            }
+
+            if (saveData.length > 0) {
+                timetableEmpty.classList.add('hidden');
+                timetableContainer.classList.remove('hidden');
+            }
+        };
+
+        function loadCompTimetable() {
+            if (!loggedInUser) return;
+            const key = getTimetableKey();
+            const stored = localStorage.getItem(key);
+            if (stored) {
+                try {
+                    const data = JSON.parse(stored);
+                    if (Array.isArray(data) && data.length > 0) {
+                        timetableEmpty.classList.add('hidden');
+                        timetableContainer.classList.remove('hidden');
+                        renderTimetable(data);
+                    } else {
+                        timetableEmpty.classList.remove('hidden');
+                        timetableContainer.classList.add('hidden');
+                    }
+                } catch (e) { console.error(e); }
+            } else {
+                timetableEmpty.classList.remove('hidden');
+                timetableContainer.classList.add('hidden');
+            }
+        }
+
+        // ===== Dashboard Tab Functionality =====
+        let currentTab = 'dashboard-home';
+
+        // Clock functionality
+        function updateClock() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+            const dateEl = document.getElementById('current-date-display');
+            const timeEl = document.getElementById('current-time-display');
+
+            if (dateEl) dateEl.textContent = dateStr;
+            if (timeEl) timeEl.textContent = timeStr;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        document.querySelectorAll('.tab-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const tabId = button.getAttribute('data-tab');
+                if (tabId !== currentTab) {
+                    if (currentTab === 'attendance') {
+                        if (videoAttendance.srcObject) {
+                            videoAttendance.srcObject.getTracks().forEach(t => t.stop());
+                            videoAttendance.pause();
+                        }
+                        if (attendanceInterval) clearInterval(attendanceInterval);
+                        isVideoAttendancePlaying = false;
+                        markAttendanceBtn.disabled = true;
+                    }
+                    currentTab = tabId;
+                }
+
+                // Deactivate all tabs
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    if (btn.classList.contains('text-blue-400')) {
+                        btn.classList.remove('text-blue-400', 'bg-blue-900/50', 'border', 'border-blue-500/20');
+                    }
+                    btn.classList.add('text-gray-400');
+                    // Reset mobile/desktop specific styles
+                    btn.classList.remove('bg-blue-900', 'border-b-2', 'border-blue-400');
+                });
+
+                // Activate clicked tab
+                if (button.classList.contains('text-gray-400')) {
+                    button.classList.remove('text-gray-400');
+                }
+                button.classList.add('text-blue-400');
+
+                // For mobile tabs with border
+                if (button.classList.contains('border-b-2') || button.parentElement.classList.contains('overflow-x-auto')) {
+                    // Basic check for mobile nav
+                    button.classList.add('border-b-2', 'border-blue-400');
+                } else {
+                    // Desktop sidebar style
+                    button.classList.add('bg-blue-900/50', 'border', 'border-blue-500/20');
+                }
+
+                // Hide all tab content
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+
+                // Show selected tab content
+                const targetContent = document.getElementById(tabId);
+                if (targetContent) targetContent.classList.add('active');
+
+                if (tabId === 'attendance' && loggedInUser) {
+                    startVideo(videoAttendance, canvasAttendance, 'attendance');
+                }
+            });
+        });
+
+        window.addEventListener('load', () => {
+            // Ensure correct initial state
+            if (!loggedInUser) {
+                document.getElementById('main-app').classList.add('hidden');
+                document.getElementById('navbar').classList.add('hidden');
+                document.getElementById('mobile-tabs').classList.add('hidden');
+                document.getElementById('auth-screens').classList.remove('hidden');
+                document.getElementById('role-selection').classList.remove('hidden');
+                document.getElementById('student-auth').classList.add('hidden');
+            }
+            loadModels();
+        });
     </script>
 
     <!-- Gemini Chat Widget -->
@@ -2015,26 +2584,7 @@
         <i class="fas fa-robot text-2xl text-slate-900"></i>
     </button>
 
-    <script>
-        // NAVIGATION AND FACE-API (Basic UI logic)
-        function showLogin() {
-            document.getElementById('home-screen').classList.add('hidden');
-            document.getElementById('login-screen').classList.remove('hidden');
-        }
-        document.getElementById('login-btn').onclick = function () {
-            document.getElementById('auth-screens').classList.add('hidden');
-            document.getElementById('dashboard-content').classList.remove('hidden');
-        };
-        function logout() { location.reload(); }
 
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.onclick = () => {
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                const target = document.getElementById(btn.dataset.tab);
-                if (target) target.classList.add('active');
-            };
-        });
-    </script>
 
     <script type="module">
         // These variables are now declared ONLY ONCE to fix the "Redeclare" error
@@ -2108,7 +2658,3 @@
 
 
 </html>
-
-
-
-
