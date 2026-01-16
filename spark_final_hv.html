@@ -568,7 +568,7 @@
             <div class="hidden md:block w-full md:w-1/4 lg:w-1/5">
                 <div class="bg-gray-800 rounded-lg shadow-md p-4 mb-6">
                     <div class="flex flex-col items-center text-center mb-6">
-                        <img class="h-24 w-24 rounded-full mb-4 border-4 border-blue-500"
+                        <img id="sidebar-profile-img" class="h-24 w-24 rounded-full mb-4 border-4 border-blue-500"
                             src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366F1'%3E%3Cpath d='M12 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0 2c-6.627 0-12 5.373-12 12h24c0-6.627-5.373-12-12-12z'/%3E%3C/svg%3E"
                             alt="Profile">
                         <h2 class="text-xl font-bold" id="sidebar-username">User</h2>
@@ -1206,10 +1206,14 @@
 
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                                 <div class="md:col-span-1 flex flex-col items-center">
-                                    <img class="h-32 w-32 rounded-full mb-4 border-4 border-blue-500"
+                                    <img id="profile-img-preview"
+                                        class="h-32 w-32 rounded-full mb-4 border-4 border-blue-500"
                                         src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366F1'%3E%3Cpath d='M12 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0 2c-6.627 0-12 5.373-12 12h24c0-6.627-5.373-12-12-12z'/%3E%3C/svg%3E"
                                         alt="Profile">
-                                    <button class="text-blue-400 text-sm mt-2">Change Photo</button>
+                                    <input type="file" id="profile-upload-input" accept="image/*" class="hidden">
+                                    <button class="text-blue-400 text-sm mt-2"
+                                        onclick="document.getElementById('profile-upload-input').click()">Change
+                                        Photo</button>
                                 </div>
 
                                 <div class="md:col-span-2">
@@ -3999,7 +4003,48 @@
                 const el = document.getElementById(id);
                 if (el) el.value = val;
             }
+
+            // Update Sidebar and Images
+            if (userData.profileImage) {
+                const preview = document.getElementById('profile-img-preview');
+                const sidebarImg = document.getElementById('sidebar-profile-img');
+                if (preview) preview.src = userData.profileImage;
+                if (sidebarImg) sidebarImg.src = userData.profileImage;
+            }
+            const sidebarName = document.getElementById('sidebar-username');
+            const sidebarId = document.getElementById('sidebar-id');
+            if (sidebarName && userData.name) sidebarName.textContent = userData.name;
+            if (sidebarId && userData.id) sidebarId.textContent = userData.id;
         };
+
+        // Profile Image Upload Handling
+        const profileUploadInput = document.getElementById('profile-upload-input');
+        if (profileUploadInput) {
+            profileUploadInput.addEventListener('change', function (e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function (evt) {
+                    const dataUrl = evt.target.result;
+                    // Update Previews
+                    const preview = document.getElementById('profile-img-preview');
+                    const sidebarImg = document.getElementById('sidebar-profile-img');
+                    if (preview) preview.src = dataUrl;
+                    if (sidebarImg) sidebarImg.src = dataUrl;
+
+                    // Save to User Data Immediately
+                    if (loggedInUser) {
+                        loggedInUser.profileImage = dataUrl;
+                        if (registeredUsers[loggedInUser.username]) {
+                            registeredUsers[loggedInUser.username].profileImage = dataUrl;
+                            localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+                            localStorage.setItem('spark_session_user', JSON.stringify(loggedInUser));
+                        }
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+        }
 
         // Save Profile Logic
         const saveProfileBtn = document.getElementById('saveProfileBtn');
