@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>sprk - Integrated Dashboard</title>
+    <title>spark - Integrated Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -403,7 +403,7 @@
                 <div class="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-blue-600/10 mb-8">
                     <i class="fas fa-graduation-cap text-6xl text-blue-500"></i>
                 </div>
-                <h1 class="text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight">Welcome to SPRK</h1>
+                <h1 class="text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight">Welcome to SPARK</h1>
                 <p class="text-gray-400 text-xl max-w-2xl mx-auto">Your comprehensive platform for modern education
                     management. Select your role to get started.</p>
             </div>
@@ -489,10 +489,6 @@
                             By continuing, you agree to verify your identity using Face Recognition for attendance
                             tracking.
                         </p>
-                        <button onclick="simulateStudentLogin()"
-                            class="mt-4 text-xs bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1 rounded transition-colors">
-                            (Dev) Simulate Login
-                        </button>
                     </div>
 
                     <div class="pt-6 border-t border-gray-700">
@@ -529,7 +525,7 @@
             <div class="flex justify-between items-center py-4">
                 <div class="flex items-center space-x-2">
                     <i class="fas fa-graduation-cap text-2xl"></i>
-                    <span class="text-xl font-bold">sprk</span>
+                    <span class="text-xl font-bold">spark</span>
                 </div>
                 <div class="flex items-center space-x-4">
                     <div class="hidden md:flex flex-col text-right">
@@ -572,7 +568,7 @@
             <div class="hidden md:block w-full md:w-1/4 lg:w-1/5">
                 <div class="bg-gray-800 rounded-lg shadow-md p-4 mb-6">
                     <div class="flex flex-col items-center text-center mb-6">
-                        <img id="sidebar-profile-img" class="h-24 w-24 rounded-full mb-4 border-4 border-blue-500"
+                        <img class="h-24 w-24 rounded-full mb-4 border-4 border-blue-500"
                             src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366F1'%3E%3Cpath d='M12 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0 2c-6.627 0-12 5.373-12 12h24c0-6.627-5.373-12-12-12z'/%3E%3C/svg%3E"
                             alt="Profile">
                         <h2 class="text-xl font-bold" id="sidebar-username">User</h2>
@@ -1210,14 +1206,10 @@
 
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                                 <div class="md:col-span-1 flex flex-col items-center">
-                                    <img id="profile-img-preview"
-                                        class="h-32 w-32 rounded-full mb-4 border-4 border-blue-500"
+                                    <img class="h-32 w-32 rounded-full mb-4 border-4 border-blue-500"
                                         src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366F1'%3E%3Cpath d='M12 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0 2c-6.627 0-12 5.373-12 12h24c0-6.627-5.373-12-12-12z'/%3E%3C/svg%3E"
                                         alt="Profile">
-                                    <input type="file" id="profile-upload-input" accept="image/*" class="hidden">
-                                    <button class="text-blue-400 text-sm mt-2"
-                                        onclick="document.getElementById('profile-upload-input').click()">Change
-                                        Photo</button>
+                                    <button class="text-blue-400 text-sm mt-2">Change Photo</button>
                                 </div>
 
                                 <div class="md:col-span-2">
@@ -2145,11 +2137,11 @@
                 const email = payload.email;
                 const name = payload.name;
 
-                // Domain Restriction (Temporarily Disabled for Testing)
-                // if (!email.endsWith('@ietdavv.edu.in')) {
-                //    showMessage("Access Denied: Please use your official @ietdavv.edu.in account.");
-                //    return;
-                // }
+                // Domain Restriction
+                if (!email.endsWith('@ietdavv.edu.in')) {
+                    showMessage("Access Denied: Please use your official @ietdavv.edu.in account.");
+                    return;
+                }
 
                 // Check if user already exists
                 let existingUser = null;
@@ -2181,12 +2173,7 @@
                     };
 
                     registeredUsers[username] = newUser;
-                    try {
-                        localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
-                    } catch (e) {
-                        console.warn("Storage full: Could not save new user persistence.");
-                        showMessage("Warning: Storage full. Account created for this session only.");
-                    }
+                    localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
 
                     loggedInUser = newUser;
                     saveSession(loggedInUser);
@@ -2197,28 +2184,8 @@
 
             } catch (error) {
                 console.error("Decoding JWT failed", error);
-                showMessage("Authentication failed: " + error.message);
+                showMessage("Authentication failed. Please try again.");
             }
-        };
-
-        // DEV: Simulate Login for Localhost Testing
-        window.simulateStudentLogin = function () {
-            const mockUser = {
-                name: "Test Student",
-                email: "test@ietdavv.edu.in",
-                username: "test_student_" + Math.floor(Math.random() * 1000),
-                role: "student",
-                id: "STU_TEST",
-                course: "B.Tech CS",
-                studentClass: "Computer Science - A"
-            };
-            loggedInUser = mockUser;
-            try {
-                localStorage.setItem('spark_session_user', JSON.stringify(loggedInUser));
-            } catch (e) { }
-            toggleMainApp(true);
-            populateProfileData();
-            showMessage("Note: You are using Simulated Login (Dev Mode).");
         };
 
         // Liveness Logic
@@ -2341,7 +2308,7 @@
 
                     if (livenessMode === 'attendance') {
                         // All tasks completed during attendance
-                        finalizeAttendance(detections);
+                        finalizeAttendance();
                     }
                 }
             }
@@ -2878,12 +2845,9 @@
 
 
         // Helper to finalize attendance after face match + liveness
-        async function finalizeAttendance(providedDetections = null) {
+        async function finalizeAttendance() {
             // Re-detect to confirm face match during liveness or after
-            let detections = providedDetections;
-            if (!detections) {
-                detections = await faceapi.detectSingleFace(videoAttendance, new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 })).withFaceDescriptor();
-            }
+            const detections = await faceapi.detectSingleFace(videoAttendance, new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 })).withFaceDescriptor();
             if (!detections) {
                 showMessage("Face lost during verification. Try again.");
                 return;
@@ -3918,11 +3882,7 @@
 
         // ===== Session Persistence & Tab State =====
         const saveSession = (user) => {
-            try {
-                localStorage.setItem('spark_session_user', JSON.stringify(user));
-            } catch (e) {
-                console.warn("Storage warning: Failed to save session user (Quota Exceeded)");
-            }
+            localStorage.setItem('spark_session_user', JSON.stringify(user));
         };
 
         const clearSession = () => {
@@ -4036,81 +3996,7 @@
                 const el = document.getElementById(id);
                 if (el) el.value = val;
             }
-
-            // Update Sidebar and Images
-            if (userData.profileImage) {
-                const preview = document.getElementById('profile-img-preview');
-                const sidebarImg = document.getElementById('sidebar-profile-img');
-                if (preview) preview.src = userData.profileImage;
-                if (sidebarImg) sidebarImg.src = userData.profileImage;
-            }
-            const sidebarName = document.getElementById('sidebar-username');
-            const sidebarId = document.getElementById('sidebar-id');
-            if (sidebarName && userData.name) sidebarName.textContent = userData.name;
-            if (sidebarId && userData.id) sidebarId.textContent = userData.id;
         };
-
-        // Profile Image Upload Handling
-        const profileUploadInput = document.getElementById('profile-upload-input');
-        if (profileUploadInput) {
-            profileUploadInput.addEventListener('change', function (e) {
-                const file = e.target.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = function (evt) {
-                    const img = new Image();
-                    img.onload = function () {
-                        const canvas = document.createElement('canvas');
-                        const MAX_SIZE = 150; // Resize to max 150px
-                        let width = img.width;
-                        let height = img.height;
-
-                        if (width > height) {
-                            if (width > MAX_SIZE) {
-                                height *= MAX_SIZE / width;
-                                width = MAX_SIZE;
-                            }
-                        } else {
-                            if (height > MAX_SIZE) {
-                                width *= MAX_SIZE / height;
-                                height = MAX_SIZE;
-                            }
-                        }
-
-                        canvas.width = width;
-                        canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-
-                        // Compress to JPEG 0.7 to save space
-                        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-
-                        // Update Previews
-                        const preview = document.getElementById('profile-img-preview');
-                        const sidebarImg = document.getElementById('sidebar-profile-img');
-                        if (preview) preview.src = dataUrl;
-                        if (sidebarImg) sidebarImg.src = dataUrl;
-
-                        // Save to User Data Immediately
-                        if (loggedInUser) {
-                            loggedInUser.profileImage = dataUrl;
-                            if (registeredUsers[loggedInUser.username]) {
-                                registeredUsers[loggedInUser.username].profileImage = dataUrl;
-                                try {
-                                    localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
-                                    localStorage.setItem('spark_session_user', JSON.stringify(loggedInUser));
-                                } catch (e) {
-                                    console.error("Storage Quota Exceeded", e);
-                                    alert("Storage full! Image saved in session but cannot verify persistence. Try clearing browser data or using a smaller image.");
-                                }
-                            }
-                        }
-                    };
-                    img.src = evt.target.result;
-                };
-                reader.readAsDataURL(file);
-            });
-        }
 
         // Save Profile Logic
         const saveProfileBtn = document.getElementById('saveProfileBtn');
@@ -4131,9 +4017,7 @@
                     ...updatedData
                 };
 
-                try {
-                    localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
-                } catch (e) { console.warn("Storage full during profile save", e); }
+                localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
                 loggedInUser = { ...loggedInUser, ...updatedData };
                 saveSession(loggedInUser);
 
